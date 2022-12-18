@@ -7,6 +7,7 @@ import versionController from '../controllers/ver';
 
 export default async function router(fastify: FastifyInstance) {
 
+console.log("in router");
 
     fastify.setErrorHandler((error:any, request:any, resp:any) => {
         const payload: any = {
