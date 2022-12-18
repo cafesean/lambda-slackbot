@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 
 import gptController from '../controllers/gpt';
-import slackController from '../controllers/slack';
+// import slackController from '../controllers/slack';
 import versionController from '../controllers/ver';
 
 
@@ -20,7 +20,7 @@ console.log("in router");
   });
 
   fastify.register(gptController, { prefix : '/gpt' });
-  fastify.register(slackController, { prefix : '/slack' });
+  // fastify.register(slackController, { prefix : '/slack' });
   fastify.register(versionController, { prefix : '/ver' });
     
 }

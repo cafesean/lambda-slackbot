@@ -3,13 +3,14 @@ import Fastify from 'fastify';
 
 import dotenv from "dotenv";
 import router from './router';
-// import router from './router';
+import slackController from './functions/slackbot';
 
 dotenv.config();
 
 const fastifyOptions = {
-    logger: true,
+    logger: false,
 };
+
 
 function init() {
     // Initializes your app with your bot token and the AWS Lambda ready receiver
@@ -20,16 +21,14 @@ function init() {
 	// .register(AutoLoad, {
 	// 	dir: join(__dirname, './plugins'),
 	// })
-	.register(router);
+	.register(slackController, router);
 
 	return app;
-
-
 };
 
 if (require.main === module) {
     init().listen({ 
-		port: 3000,
+		port: 8080,
 		host: 'localhost', 
 	}, (err) => {
         if (err)
