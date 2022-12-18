@@ -1,0 +1,44 @@
+{
+  "name": "slackbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/app.js",
+  "scripts": {
+    "amplify:token": "cd amplify/backend/function/token && tsc -p ./tsconfig.json && cd -",
+    "clean": "rm -rf src",
+    "compile": "npx tsup dev/*.ts dev/**/*.* --out-dir src",
+    "compile:vercel": "npx tsup dev/*.ts dev/**/*.* --out-dir public",
+    "build": "npm run clean && npm run compile",
+    "vercel": "npm run clean && npm run compile:vercel",
+    "deploy": "rm -rf dist && amplify push",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js",
+    "dev": "yarn start:dev",
+    "start:build": "node src/app.js",
+    "start:dev": "tsx dev/app.ts",
+    "start:watch": "tsx watch dev/app.ts",
+    "typecheck": "tsc -b"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/autoload": "^5.6.0",
+    "@fastify/aws-lambda": "^3.1.3",
+    "@slack/bolt": "^3.12.2",
+    "@types/node": "^18.11.9",
+    "axios": "^1.2.1",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.0.3",
+    "fastify": "^4.10.2",
+    "fastify-plugin": "^4.3.0",
+    "fastify-tsconfig": "^1.0.1"
+  },
+  "devDependencies": {
+    "path": "^0.12.7",
+    "serverless-offline": "^12.0.2",
+    "tsup": "^6.5.0",
+    "tsx": "^3.12.1",
+    "yarn": "^1.22.19"
+  }
+}

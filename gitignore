@@ -1,0 +1,15 @@
+.deps
+.env
+nodejs
+node_modules
+src
+dist
+*.zip
+.DS_Store
+package-lock.json
+yarn.lock
+test.http
+public/app.js
+public/index.js
+public/controllers/gpt.js
+public/router/index.js
