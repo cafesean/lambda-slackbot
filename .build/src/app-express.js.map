@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/app-express.js"],
+  "sourcesContent": ["\"use strict\";\n\n// dev/app-express.ts\nvar express = require(\"express\");\nvar app = express();\nvar port = 3e3;\napp.get(\"/slack\", async (req, res) => {\n  res.status(200).send(\"v1.0.8\");\n});\napp.listen(port, () => {\n  console.log(`Example app listening at http://localhost:${port}`);\n});\n"],
+  "mappings": ";AAGA,IAAI,UAAU,QAAQ;AACtB,IAAI,MAAM;AACV,IAAI,OAAO;AACX,IAAI,IAAI,UAAU,OAAO,KAAK,QAAQ;AACpC,MAAI,OAAO,KAAK,KAAK;AAAA;AAEvB,IAAI,OAAO,MAAM,MAAM;AACrB,UAAQ,IAAI,6CAA6C;AAAA;",
+  "names": []
+}

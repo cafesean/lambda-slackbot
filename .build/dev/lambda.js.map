@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../dev/lambda.ts"],
+  "sourcesContent": ["const awsLambdaFastify = require('@fastify/aws-lambda');\nconst init = require('./app');\nconst proxy = awsLambdaFastify(init());\n\n// Handle the Lambda function event\nmodule.exports.handler = async (event:any, context:any, callback:any) => proxy(event, context, callback);"],
+  "mappings": "AAAA,MAAM,mBAAmB,QAAQ;AACjC,MAAM,OAAO,QAAQ;AACrB,MAAM,QAAQ,iBAAiB;AAG/B,OAAO,QAAQ,UAAU,OAAO,OAAW,SAAa,aAAiB,MAAM,OAAO,SAAS;",
+  "names": []
+}

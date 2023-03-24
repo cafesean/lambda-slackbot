@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../dev/app.ts"],
+  "sourcesContent": ["import Fastify from 'fastify';\n// import AutoLoad from '@fastify/autoload';\n\nimport dotenv from \"dotenv\";\nimport router from './router';\nimport slackController from './functions/slackbot';\n\ndotenv.config();\n\nconst fastifyOptions = {\n  logger: false,\n};\n\n// function init() {\n// Initializes your app with your bot token and the AWS Lambda ready receiver\nconst app = Fastify(fastifyOptions);\n\n// app.get('/', (req: any, res: any) => {\n//   res.status(200).send(\"hello\")\n// });\n\nvoid app\n  // Register plugins.\t\n  // .register(AutoLoad, {\n  // \tdir: join(__dirname, './plugins'),\n  // })\n  .register(slackController, router);\n\n// return app;\n// return app;\n\n// if (require.main === module) {\napp.listen({\n  port: 8080,\n  host: '0.0.0.0'\n}, (err) => {\n  if (err)\n    console.error(err);\n  console.log('server listening on 3000');\n});\n// }\n// else {\n//   module.exports = init;\n// }\n// };\n\n\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA,qBAAoB;AAGpB,oBAAmB;AACnB,oBAAmB;AACnB,sBAA4B;AAE5B,sBAAO;AAEP,MAAM,iBAAiB;AAAA,EACrB,QAAQ;AAAA;AAKV,MAAM,MAAM,4BAAQ;AAMpB,KAAK,IAKF,SAAS,yBAAiB;AAM7B,IAAI,OAAO;AAAA,EACT,MAAM;AAAA,EACN,MAAM;AAAA,GACL,CAAC,QAAQ;AACV,MAAI;AACF,YAAQ,MAAM;AAChB,UAAQ,IAAI;AAAA;",
+  "names": []
+}

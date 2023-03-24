@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../dev/router/index.ts"],
+  "sourcesContent": ["import { FastifyInstance } from 'fastify';\n\nimport gptController from '../controllers/gpt';\n// import slackController from '../controllers/slack';\nimport versionController from '../controllers/ver';\n\n\nexport default async function router(fastify: FastifyInstance) {\n\nconsole.log(\"in router\");\n\n    fastify.setErrorHandler((error:any, request:any, resp:any) => {\n        const payload: any = {\n        url: request.url,\n        headers: request.headers,\n        body: request.body,\n    };\n    request.log.error(payload, error.message);\n    resp.send(error.message);\n  });\n\n  fastify.register(gptController, { prefix : '/gpt' });\n  // fastify.register(slackController, { prefix : '/slack' });\n  fastify.register(versionController, { prefix : '/' });\n    \n}"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAEA,iBAA0B;AAE1B,iBAA8B;AAG9B,sBAAqC,SAA0B;AAE/D,UAAQ,IAAI;AAER,UAAQ,gBAAgB,CAAC,OAAW,SAAa,SAAa;AAC1D,UAAM,UAAe;AAAA,MACrB,KAAK,QAAQ;AAAA,MACb,SAAS,QAAQ;AAAA,MACjB,MAAM,QAAQ;AAAA;AAElB,YAAQ,IAAI,MAAM,SAAS,MAAM;AACjC,SAAK,KAAK,MAAM;AAAA;AAGlB,UAAQ,SAAS,oBAAe,EAAE,QAAS;AAE3C,UAAQ,SAAS,oBAAmB,EAAE,QAAS;AAAA;",
+  "names": []
+}

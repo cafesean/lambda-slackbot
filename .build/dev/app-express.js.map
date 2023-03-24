@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../dev/app-express.ts"],
+  "sourcesContent": ["//require express to create endpoint to handle the request o port 3000\nconst express = require('express');\nconst app = express();\nconst port = 3000;\n\n// const { getURIs, getURI\n//         } = require(\"src/contracts.js\");\n\napp.get('/slack', async (req: any, res: any) => {\n  res.status(200).send(\"v1.0.8\")\n});\n\n\n\n//listen to port 3000\napp.listen(port, () => {\n  console.log(`Example app listening at http://localhost:${port}`)\n})\n"],
+  "mappings": "AACA,MAAM,UAAU,QAAQ;AACxB,MAAM,MAAM;AACZ,MAAM,OAAO;AAKb,IAAI,IAAI,UAAU,OAAO,KAAU,QAAa;AAC9C,MAAI,OAAO,KAAK,KAAK;AAAA;AAMvB,IAAI,OAAO,MAAM,MAAM;AACrB,UAAQ,IAAI,6CAA6C;AAAA;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../dev/components/type.ts"],
+  "sourcesContent": ["export async function type(prompt: string) {\n\n  if (trim(prompt) ==\"\") {\n    return \"help\";  \n  }\n\n  // wro\n  // select case (mainString.match(/^<\\w+>/)[0]) {\n\n  // }\n}"],
+  "mappings": ";;;;;;;AAAA;AAAA;AAAA;AAAA,oBAA2B,QAAgB;AAEzC,MAAI,KAAK,WAAU,IAAI;AACrB,WAAO;AAAA;AAAA;",
+  "names": []
+}

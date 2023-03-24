@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../dev/controllers/ver.ts"],
+  "sourcesContent": ["import { FastifyInstance } from 'fastify';\n\nexport default async function versionController(fastify: FastifyInstance) {\n  fastify.get('/', (req: any, res: any) => {\n    res.status(200).send(\"v1.0.8\")\n  })\n}\n"],
+  "mappings": ";;;;;;;AAAA;AAAA;AAAA;AAEA,iCAAgD,SAA0B;AACxE,UAAQ,IAAI,KAAK,CAAC,KAAU,QAAa;AACvC,QAAI,OAAO,KAAK,KAAK;AAAA;AAAA;",
+  "names": []
+}

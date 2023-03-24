@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../dev/components/validate.ts"],
+  "sourcesContent": ["\n// This code snippet is based on https://github.com/antonputra/tutorials/tree/main/lessons/076\nimport crypto from \"crypto\";\n// const crypto = require(\"crypto\");\n\nexport function validateSlackRequest (req:any, signingSecret:any) {\n\n    const requestBody = JSON.stringify(req[\"body\"])\n\n    const headers = req.headers\n\n    const timestamp = headers[\"x-slack-request-timestamp\"]\n    const slackSignature = headers[\"x-slack-signature\"]\n    const baseString = 'v0:' + timestamp + ':' + requestBody\n    const hmac = crypto.createHmac(\"sha256\", signingSecret)\n        .update(baseString)\n        .digest(\"hex\")\n    const computedSlackSignature = \"v0=\" + hmac\n\n    const isValid = computedSlackSignature === slackSignature\n\n    return isValid;\n};\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAEA,oBAAmB;AAGZ,8BAA+B,KAAS,eAAmB;AAE9D,QAAM,cAAc,KAAK,UAAU,IAAI;AAEvC,QAAM,UAAU,IAAI;AAEpB,QAAM,YAAY,QAAQ;AAC1B,QAAM,iBAAiB,QAAQ;AAC/B,QAAM,aAAa,QAAQ,YAAY,MAAM;AAC7C,QAAM,OAAO,sBAAO,WAAW,UAAU,eACpC,OAAO,YACP,OAAO;AACZ,QAAM,yBAAyB,QAAQ;AAEvC,QAAM,UAAU,2BAA2B;AAE3C,SAAO;AAAA;AACV;",
+  "names": []
+}

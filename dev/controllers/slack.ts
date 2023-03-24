@@ -1,301 +1,153 @@
 
-const { App, AwsLambdaReceiver, subtype } = require('@slack/bolt');
 import { FastifyInstance } from 'fastify';
-import { gpt } from '../components/gpt';
-import { sendChallenge } from '../components/challenge';
+import { sendChallenge } from '../components/challenge'
+import { validateSlackRequest } from '../components/_validate'
+import { acknowledge, postToChannel } from "./_utils"
 
-// Initialize your custom receiver
-const awsLambdaReceiver = new AwsLambdaReceiver({
-    signingSecret: process.env.SLACK_SIGNING_SECRET,
+const { App } = require('@slack/bolt');
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
+// export const config = {
+//     api: {
+//       externalResolver: true,
+//     },
+// }
+const app = new App({
+    token: process.env.SLACK_BOT_TOKEN,
+    socketMode: false,
+    appToken: process.env.SLACK_APP_TOKEN,
+    signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
 export default async function slackController(fastify: FastifyInstance) {
-    fastify.post('/', async(req:any, res:any) => {
+    const {
+        // set query params to number type
+        // query: { id, max_tokens, temp },
+        body: { token, challenge, type, event },
+        method,
+    } = req;
+    
 
-console.log("In slackController");
-        const app = new App({
-            token: process.env.SLACK_BOT_TOKEN,
-            receiver: awsLambdaReceiver,
-        // processBeforeResponse: true
+// console.log("app.bot_id=null:", app.bot_id==null);
+// console.log("app.event_type:", app.event_type);
+// console.log("app.event:", JSON.stringify(app.event));
+    // var type = req.body.type
+    if (type === "url_verification") {
+        await sendChallenge(req, res)
+        return;
+    } else if (app.bot_id!=null || event.type != "message") {
+        console.log("IS A BOT or NOT A MESSAGE\n***************************\n");
+        // res.status(200).end();
+        return;
+    }
+
+    let channel = app.channel;
+    let thread = <string>app.thread_ts;
+    let prompt =  req.body.event.text;
+
+    if (prompt.indexOf("’") != -1) {
+            const result = await app.client.chat.postMessage({
+            channel: event.channel,
+            thread_ts: event.ts,
+            text: "Single quotes (\') are not allowed."
         });
+        console.log("Single quotes (\') are not allowed.");
+        // res.status(200).end();
+        return res.status(200).end();
+    } 
 
-        const { type, event } = req.body;
+    if (!validateSlackRequest(req, signingSecret)) {
+        console.log("Request invalid");
+        // res.status(500).end();
+        return res.status(200).end();
+    }
+    res.status(200).send("ok");
+    // res.json({ok:true}); 
+    
+console.log("NOT A BOT");
+    
+    // var event_type = app.event_type;
 
-        if (type === "url_verification") {
-            await sendChallenge(req, res)
-            return;
+
+    const engine = "text-davinci-003";
+
+    var temperature = new Number(process.env.TEMPERATURE);
+    var tokens = new Number(process.env.MAX_TOKENS);
+
+    const apiUrl = 'https://api.openai.com/v1/engines/' + engine + '/completions';
+console.log("prompt: ", prompt);
+console.log("apiUrl: ", apiUrl);
+console.log("event.channel: ", event.channel);
+console.log("event.ts: ", event.ts);
+    const data = {
+        prompt: prompt,
+        max_tokens: tokens,
+        temperature: temperature,
+    };
+    const options = {
+        headers: {
+        "Content-Type": `application/json`,
+        "Authorization": "Bearer " + process.env.OPENAI_API_KEY,
         }
+    };
 
-        app.event('app_home_opened', async ({ event, client, logger }:{ event:any, client:any, logger:any }) => {
-        try {
+    var completion = "";
+    
+    const timer = new Promise((resolve, reject) => {
+        // Set up the timeout
+        const timer = setTimeout(() => {
+            reject("timed out");
+        }, 10000);
 
-            console.log("In app_home_opened");
-            // Call views.publish with the built-in client
-            const result = await client.views.publish({
-            // Use the user ID associated with the event
-            user_id: event.user,
-            view: {
-                        "type": "home",
-                        "blocks": [
-                            {
-                                "type": "input",
-                                "element": {
-                                    "type": "plain_text_input",
-                                    "multiline": true,
-                                    "action_id": "plain_text_input-action"
-                                },
-                                "label": {
-                                    "type": "plain_text",
-                                    "text": "Enter your prompt:",
-                                    "emoji": true
-                                }
-                            }
-                        ]
-                    }
+
+        // create promise chain for axios request
+        const openai = new Promise((resolve, reject) => {
+            // Set up the timeout
+            //
+            axios
+            .post(apiUrl, data, options)
+            .then(response => {
+                completion = response.data.choices[0].text;
+                // console.log("data: ", response.data.choices[0].text);
+                resolve("success");
+            })
+            .catch(error => {
+                console.log("in catch error");
+                reject("failure");
             });
-
-            logger.info(result);
-        }
-        catch (error) {
-            logger.error(error);
-        }
-        });
-
-        // write a listener function for app_home_open using slack/bolt
-        app.shortcut('send_prompt', async ({ shortcut, ack, client, logger }:{ shortcut:any, ack:any, client:any, logger:any }) => {
-            await ack();
-            
-            try {
-            // Acknowledge shortcut request
-            // Call the views.open method using one of the built-in WebClients
-            const result = await client.views.open({
-            trigger_id: shortcut.trigger_id,
-            view: {
-                type: "modal",
-                title: {
-                type: "plain_text",
-                text: "My App"
-                },
-                close: {
-                type: "plain_text",
-                text: "Close"
-                },
-                blocks: [
-                {
-                    type: "section",
-                    text: {
-                    type: "mrkdwn",
-                    text: "Section 1"
-                    }
-                },
-                {
-                    type: "context",
-                    elements: [
-                    {
-                        type: "mrkdwn",
-                        text: "Content 1"
-                    }
-                    ]
+        })
+        .then((result) => {
+            result = new Promise((resolve, reject) => {
+                try{
+                    app.client.chat.postMessage({
+                        channel: event.channel,
+                        thread_ts: event.ts,
+                        text: completion
+                    });
+                    console.log("Slack message sent.")
+                    resolve("success");
+                    // res.status(200).end("ok")
+                } catch(e) {
+                    console.log("catch=",e);
+                    reject("failure");
+                    // res.status(200).end("error");
                 }
-                ]
-            }
             });
-
-            logger.info(result);
-        }
-        catch (error) {
-            logger.error(error);
-        }
+            resolve("success");
+        })
+        .catch((error) => {
+            reject("failure");
+            console.log("error in catch: ", error);
+            // res.status(200).end("error");
         });
-
-
-        app.message(subtype('bot_message'), async ({ next, say }:{next:any,say:any}) => {
-        await say(`bot_message`);
-        await next();
-        });
-
-        // app.message('send_prompt', async ({ message, ack, respondInThread }:{message:any, ack:any,respondInThread:any}) => {
-        //   // Acknowledge shortcut request
-        //   ack();
-
-        //   try {
-        //     // Send a message to the thread where the shortcut was triggered
-        //     await respondInThread({
-        //       thread_ts: message.ts,
-        //       text: 'hello'
-        //     });
-        //   } catch (error) {
-        //     console.error(error);
-        //   }
-        // });
-
-        // respond with GPT3 completion
-        app.command('/ask', async ({ command, ack, say, respond }:{ command:any, ack:any, say:any, respond:any}) => {
-            // await say(`Tesla is great`);
-        // app.thread_ts = message.ts;
-        await ack();
-        await(respond(`\nPrompt:\n` + command.text));
-        const engine = "text-davinci-003";
-
-        var temperature = new Number(process.env.TEMPERATURE);
-        var tokens = new Number(process.env.MAX_TOKENS);
-
-        const apiUrl = 'https://api.openai.com/v1/engines/' + engine + '/completions';
-
-        const data = {
-            prompt: command.text,
-            max_tokens: tokens,
-            temperature: temperature,
-        };
-        const options = {
-            headers: {
-            "Content-Type": `application/json`,
-            "Authorization": "Bearer " + process.env.OPENAI_API_KEY,
-            }
-        };
-        const completion = await gpt(apiUrl, data, options);
-        // console.log("completion: ", completion);
-        await respond(completion);
-
-        });
-
-            // return(completion);
-        // });
-        // });
-
-
-        //     .catch((error:any) => {
-        //         return(error);
-        //     });
-        // });
+    });
 
 
 
-            
-        // say() sends a message to the channel where the event was triggered
-                // await app.client.chat.postMessage({
-                //     channel: message.channel,
-                //     thread_ts: message.ts,
-                //     text: "app = " + JSON.stringify(app)
-                // await say("message = " + JSON.stringify(message));
-                // }); 
-            // if (app.bot_user_id!=null) {
-            //     // await app.client.chat.postMessage({
-            //     //     channel: message.channel,
-            //     //     thread_ts: message.ts,
-            //     //     text: "app_user_id = " + app.bot_user_id
-            //     // });
-
-            //     await say("bot_user_id = " + message.bot_id);
-
-            //     return;
-            // }
-            // say("hi");
-            // await say("Headers: " + JSON.stringify(app.context.http.headers));
-
-
-            // var completion = "";
-            
-            // new Promise(async (resolve, reject) => {
-            //     // Set up the timeout
-            //     const timer = setTimeout(() => {
-            //         reject("timed out");
-            //     }, 8000);
-
-                //openai call
-
-                // await say(completion);
-                // reply to slack message in thread
-                
-
-                // await say({
-                //     blocks: [
-                //     {
-                //         "type": "section",
-                //         "text": {
-                //         "type": "mrkdwn",
-                //         "text": completion
-                //         },
-                //         "accessory": {
-                //         "type": "button",
-                //         "text": {
-                //             "type": "plain_text",
-                //             "text": "Click Me"
-                //         },
-                //         "action_id": "button_click"
-                //         }
-                //     }
-                //     ],
-                //     text: completion
-                // });
-
-                // clearTimeout(timer);
-                // resolve("success");
-            // .then((completion) => { //completion is the response from openai
-                    // await app.client.chat.postMessage({
-                    //     channel: message.channel,
-                    //     thread_ts: message.ts,
-                    //     text: completion
-                    // });
-
-                    // say(completion);
-                    // console.log("Slack message sent.")
-                    
-                    // clearTimeout(timer);
-                    // resolve("success");
-                    // res.status(200).end;
-            // })
-            // .catch((error) => {
-                // console.log("error in catch: ", error);
-                // reject(error);
-                // res.status(200).end;
-            // });
-
-            // }).catch((error) => {
-                // console.log("error in catch: ", error);
-                // reject(error);
-                // res.status(200).end;
-            // });
-
-
-        // });
-        // });
-        // Listens for an action from a button click
-        app.action('button_click', async ({ body, ack, say }:{ body:any, ack:any, say:any }) => {
-        await ack();
-
-        await say(`<@${body.user.id}> clicked the button`);
-        });
-
-        // Listens to incoming messages that contain "goodbye"
-        app.message('goodbye', async ({ message, say }:{message:any,say:any}) => {
-        // say() sends a message to the channel where the event was triggered
-        await say(`See ya later 5, <@${message.user}> :wave:`);
-        });
-
-        // Listens to incoming messages that contain "hello"
-        app.message("hello", async ({ message, say }:{message:any,say:any}) => {
-        // say() sends a message to the channel where the event was triggered
-        await say({
-            blocks: [
-            {
-                "type": "section",
-                "text": {
-                "type": "mrkdwn",
-                "text": `Hey there <@${message.user}>!`
-                },
-                "accessory": {
-                "type": "button",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Click Me"
-                },
-                "action_id": "button_click"
-                }
-            }
-            ],
-            text: `Hey there <@${message.user}>!`
-        });
-        });
-    });   
+    // } catch(e) {
+    //     console.log("catch=",e);
+    //     res.status(200).end("error");
+    // }
 }
